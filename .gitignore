@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+.env
+data/*.db
+data/processed/
+.DS_Store
+*.py[cod]
+.pytest_cache/
+.streamlit/secrets.toml
+resume/
+tools/build_resume.py
