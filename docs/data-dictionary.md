@@ -20,11 +20,14 @@
 - brand：品牌
 - unit_price：商品单价
 ## 指标口径
-- GMV / 销售额：SUM(fact_sales.sales_amount)
+
+- 净销售额：SUM(fact_sales.sales_amount)，计算方式为 unit_price × quantity × (1 - discount_pct / 100)
 - 订单数：COUNT(DISTINCT fact_sales.transaction_id)
-- 客单价：SUM(sales_amount) / COUNT(DISTINCT transaction_id)
-- 销售件数：SUM(quantity)
-- 平均折扣：AVG(discount_pct)
-## 建模说明
-商品信息在源数据中稳定，因此拆为 dim_product。
-customer_id 对应的年龄段、分层、地区存在变化，因此第一版不拆静态客户维度，避免错误假设。
+- 客单价：SUM(fact_sales.sales_amount) / COUNT(DISTINCT fact_sales.transaction_id)
+- 销售件数：SUM(fact_sales.quantity)
+- 平均折扣：AVG(fact_sales.discount_pct)
+
+说明：discount_pct 的实际取值为 0、5、10、15、20、25、30，单位为百分数。例如“折扣超过 20%”应写为 discount_pct > 20。
+
+- 线上（整体）：Online + Mobile App
+- 线下（整体）：In-Store

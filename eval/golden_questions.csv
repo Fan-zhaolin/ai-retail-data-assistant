@@ -1,0 +1,16 @@
+id,type,question,expected_block,expected_columns,expected_value,tolerance,notes
+G01,metric,整体净销售额、订单数和客单价是多少？,false,net_sales|order_count|aov,45357054.45|120000|377.98,0.01,三个核心指标
+G02,ranking,哪个品类净销售额最高？,false,category|net_sales,Beauty|6355718.23,0.01,最高品类
+G03,trend,2025年净销售额最高和最低的月份分别是什么？,false,month|net_sales,2025-07|2007036.02|2025-11|1783231.12,0.01,月度极值
+G04,ranking,Mobile App渠道销售额最高的品类是什么？,false,category|net_sales,Beauty|2118470.10,0.01,渠道品类
+G05,metric,VIP用户的净客单价是多少？,false,aov,375.90,0.01,VIP客单价
+G06,share,不同支付方式的订单占比分别是多少？,false,payment_method|order_share,Cash|0.200283;Credit Card|0.202183;Debit Card|0.199142;Gift Card|0.198408;PayPal|0.199983,0.0001,支付方式占比
+G07,metric,最大折扣是多少？有多少条订单？,false,max_discount|order_count,30|2431,0.01,最大折扣订单
+G08,channel,图书品类在各渠道的净销售额和订单数如何？,false,sales_channel|net_sales|order_count,In-Store|2080189.39|4982;Online|1976070.26|4805;Mobile App|1948978.04|4769,0.01,Books渠道
+G09,comparison,线上和线下的净销售额分别是多少？,false,channel|net_sales,线上|30083828.18;线下|15273226.27,0.01,线上为Online加Mobile App
+G10,segment,不同用户分层的客单价分别是多少？,false,customer_segment|aov,Loyal|379.61;New|377.48;Returning|378.92;VIP|375.90,0.01,交易时用户分层
+G11,metric,折前销售额、折扣金额和净销售额分别是多少？,false,gross_sales|discount_amount|net_sales,47996218.00|2639163.55|45357054.45,0.01,销售口径核对
+G12,empty,不存在品类火箭的商品名称有哪些？,false,product_name,0,0,应返回0行
+G13,empty,2025年12月31日的净销售额和订单数是多少？,false,net_sales|order_count,0|0,0,该日期无数据
+G14,comparison,2024年和2025年净销售额分别是多少？,false,year|net_sales,2024|22786404.01;2025|22570650.44,0.01,2025数据截至12月30日
+G15,metric,平均折扣是多少？,false,avg_discount,5.4965,0.01,问题只要求简单平均折扣

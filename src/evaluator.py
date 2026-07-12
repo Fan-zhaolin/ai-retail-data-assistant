@@ -41,3 +41,24 @@ def is_safe_sql(sql: str) -> bool:
 def has_risky_intent(question: str) -> bool:
     lowered = question.lower()
     return any(word in lowered for word in RISKY_INTENT_WORDS)
+
+def clean_sql(sql: str) -> str:
+    cleaned = sql.strip()
+
+    if cleaned.startswith("```"):
+        lines = cleaned.splitlines()
+
+        if lines and lines[0].strip().lower() in {
+            "```",
+            "```sql",
+            "```sqlite",
+            "```sqlite3",
+        }:
+            lines = lines[1:]
+
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+
+        cleaned = "\n".join(lines).strip()
+
+    return cleaned

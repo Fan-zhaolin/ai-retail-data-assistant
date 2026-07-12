@@ -3,6 +3,7 @@ import sqlite3
 import pandas as pd
 RAW_FILE = Path("data/raw/retail_sales_dataset.csv")
 DB_PATH = Path("data/app.db")
+MAX_QUERY_PROGRESS_STEPS = 100_000
 def load_raw_data() -> pd.DataFrame:
  df = pd.read_csv(RAW_FILE)
  df["transaction_date"] = pd.to_datetime(df["transaction_date"])
@@ -39,14 +40,36 @@ def build_database():
  conn = sqlite3.connect(DB_PATH)
  dim_product.to_sql("dim_product", conn, if_exists="replace", index=False)
  fact_sales.to_sql("fact_sales", conn, if_exists="replace", index=False)
+ # Keep common analytical queries responsive without relaxing read-only access.
+ conn.execute("CREATE INDEX IF NOT EXISTS idx_fact_sales_product_id ON fact_sales(product_id)")
+ conn.execute("CREATE INDEX IF NOT EXISTS idx_fact_sales_date ON fact_sales(transaction_date)")
+ conn.execute("CREATE INDEX IF NOT EXISTS idx_fact_sales_channel ON fact_sales(sales_channel)")
+ conn.execute("CREATE INDEX IF NOT EXISTS idx_fact_sales_segment ON fact_sales(customer_segment)")
+ conn.execute("CREATE INDEX IF NOT EXISTS idx_dim_product_category ON dim_product(category)")
  conn.close()
  print("database created:", DB_PATH)
  print("dim_product rows:", len(dim_product))
  print("fact_sales rows:", len(fact_sales))
+
+def ensure_database() -> None:
+    if not DB_PATH.exists():
+        build_database()
+
 def run_sql(sql: str) -> pd.DataFrame:
- conn = sqlite3.connect(DB_PATH)
- df = pd.read_sql_query(sql, conn)
- conn.close()
- return df
+    ensure_database()
+    uri = f"file:{DB_PATH.resolve().as_posix()}?mode=ro"
+
+    with sqlite3.connect(uri, uri=True, timeout=5) as conn:
+        conn.execute("PRAGMA query_only = ON")
+
+        steps = 0
+
+        def stop_expensive_query():
+            nonlocal steps
+            steps += 1
+            return 1 if steps > MAX_QUERY_PROGRESS_STEPS else 0
+
+        conn.set_progress_handler(stop_expensive_query, 1000)
+        return pd.read_sql_query(sql, conn)
 if __name__ == "__main__":
  build_database()
