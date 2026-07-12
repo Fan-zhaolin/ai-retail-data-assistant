@@ -2,12 +2,14 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from src.db import run_sql
-from src.evaluator import has_risky_intent, is_safe_sql
+from src.db import ensure_database, run_sql
+from src.evaluator import clean_sql, has_risky_intent, is_safe_sql
 from src.llm import ask_llm
 from src.prompts import build_sql_prompt
 
 
+MAX_QUESTION_LENGTH = 300
+MAX_RESULT_ROWS = 1000
 EXAMPLE_QUESTIONS = [
     "哪个品类销售额最高？",
     "不同销售渠道的销售额分别是多少？",
@@ -15,9 +17,26 @@ EXAMPLE_QUESTIONS = [
     "VIP 用户的客单价是多少？",
 ]
 
+DISPLAY_NAMES = {
+    "category": "品类",
+    "product_name": "商品名称",
+    "brand": "品牌",
+    "sales_channel": "销售渠道",
+    "region": "地区",
+    "month": "月份",
+    "net_sales": "净销售额",
+    "sales_amount": "净销售额",
+    "total_sales": "净销售额",
+    "order_count": "订单数",
+    "transaction_count": "订单数",
+    "avg_order_value": "客单价",
+    "avg_discount": "平均折扣",
+}
+
+
 
 st.set_page_config(page_title="AI 零售数据问答助手", layout="wide")
-
+ensure_database()
 
 @st.cache_data(show_spinner=False)
 def load_overview() -> dict[str, str]:
@@ -57,16 +76,22 @@ def explain_result(question: str, result: pd.DataFrame) -> str:
 
 
 st.title("AI 零售数据问答助手")
-st.caption("Text-to-SQL / SQLite / Streamlit | 数据集：retail_sales_dataset.csv")
+st.caption("用自然语言查询零售销售数据，返回可复核的数据明细、图表和业务结论。")
 
 overview = load_overview()
-metric_cols = st.columns(4)
-metric_cols[0].metric("销售明细行数", overview["total_rows"])
-metric_cols[1].metric("总销售额", overview["total_sales"])
+metric_cols = st.columns([1, 1, 0.7, 1.5])
+metric_cols[0].metric("订单记录数", overview["total_rows"])
+metric_cols[1].metric("总净销售额", overview["total_sales"])
 metric_cols[2].metric("商品数", overview["product_count"])
 metric_cols[3].metric("日期范围", overview["date_range"])
 
+st.info("当前支持：净销售额、订单数、客单价、折扣、品类、渠道、地区和用户分群。")
+st.caption("暂不支持：库存、成本、利润、退货、商品评价和门店实时数据。")
+
 st.divider()
+
+if "history" not in st.session_state:
+    st.session_state.history = []
 
 if "question" not in st.session_state:
     st.session_state.question = EXAMPLE_QUESTIONS[0]
@@ -88,18 +113,22 @@ run_clicked = st.button("生成分析", type="primary", use_container_width=Fals
 if run_clicked and not question.strip():
     st.warning("请先输入一个业务问题。")
 
-if run_clicked and question.strip():
+if run_clicked and question.strip(): 
+    if len(question) > MAX_QUESTION_LENGTH:
+        st.error("问题过长，请控制在 300 个字符以内。")
+        st.stop()
     if has_risky_intent(question):
         st.error("检测到删除、修改或建表等危险意图，已拒绝执行。")
         st.info("当前 Demo 只支持只读数据分析问题，例如销售额、订单数、趋势、品类和渠道对比。")
     else:
         with st.spinner("正在生成 SQL 并查询数据..."):
-            sql = ask_llm(build_sql_prompt(question)).strip()
+            raw_sql = ask_llm(build_sql_prompt(question))
+            sql = clean_sql(raw_sql)
 
         left, right = st.columns([1, 1])
         with left:
-            st.subheader("生成的 SQL")
-            st.code(sql, language="sql")
+            st.subheader("查询状态")
+            st.info("查询方案已生成，SQL 可在下方“技术详情”查看。")
 
         if not is_safe_sql(sql):
             with right:
@@ -108,17 +137,41 @@ if run_clicked and question.strip():
                 st.write("只允许 SELECT 或只读 WITH 查询，禁止修改数据库。")
         else:
             result = run_sql(sql)
+            if result.empty or result.isna().all(axis=None):
+                st.warning("没有匹配结果。请检查日期、品类或渠道名称。")
+                st.stop()
+            if len(result) > MAX_RESULT_ROWS:
+                st.warning("结果超过 1000 行，请增加日期或品类筛选条件。")
+                result = result.head(MAX_RESULT_ROWS)
+                
+            st.session_state.history.insert(0, {
+                "question": question,
+                "rows": len(result),
+            })
+            st.session_state.history = st.session_state.history[:5]
+                
             with right:
                 st.subheader("安全校验")
                 st.success("SQL 已通过只读安全校验。")
                 st.write(f"查询返回 {len(result)} 行。")
 
-            tab_result, tab_chart, tab_explain = st.tabs(["查询结果", "可视化", "业务解释"])
+            tab_result, tab_chart, tab_explain, tab_tech = st.tabs(
+                ["数据明细", "可视化", "业务结论", "技术详情"]
+            )
             with tab_result:
-                st.dataframe(result, use_container_width=True)
+                display_result = result.rename(columns=DISPLAY_NAMES)
+                st.dataframe(display_result, use_container_width=True, hide_index=True)
             with tab_chart:
                 draw_chart(result)
             with tab_explain:
                 with st.spinner("正在生成业务解释..."):
                     explanation = explain_result(question, result)
                 st.write(explanation)
+            with tab_tech:
+                st.success("SQL 已通过只读安全校验。")
+                st.code(sql, language="sql")
+                st.caption(f"本次查询返回 {len(result)} 行。")
+if st.session_state.history:
+    with st.expander("最近查询（当前会话）"):
+        for item in st.session_state.history:
+            st.write(f"{item['question']} - 返回 {item['rows']} 行")

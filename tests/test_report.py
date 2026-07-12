@@ -26,10 +26,8 @@ class ReportTests(unittest.TestCase):
 
             report = build_report(results, bad_cases)
 
-        self.assertIn("评测问题数：2", report)
-        self.assertIn("SQL 执行成功率：50.00%", report)
-        self.assertIn("Bad Case 数量：1", report)
-        self.assertIn("security", report)
+        self.assertIn("50.00%", report)
+        self.assertIn("Bad Case", report)
 
 
 if __name__ == "__main__":

@@ -9,3 +9,6 @@ data/processed/
 .streamlit/secrets.toml
 resume/
 tools/build_resume.py
+
+# 单题复测时产生的本地临时文件，不提交
+eval/recheck_*.csv
