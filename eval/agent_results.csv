@@ -1,0 +1,31 @@
+﻿id,query,expected_route,expected_status,actual_route,actual_status,route_pass,status_pass,passed,tool_count,requires_approval,response
+A01,订单 T0000064 到哪了？,order_lookup,success,order_lookup,success,True,True,True,1,False,订单 T0000064 状态为已送达，商品为 Dress，金额 173.06 元。
+A02,帮我查一下订单 T0000070 的状态,order_lookup,success,order_lookup,success,True,True,True,1,False,订单 T0000070 状态为已送达，商品为 Moisturizer，金额 96.50 元。
+A03,订单 T0000094 发货了吗？,order_lookup,success,order_lookup,success,True,True,True,1,False,订单 T0000094 状态为已送达，商品为 Board Game，金额 216.63 元。
+A04,T0000137 这个订单物流到哪了,order_lookup,success,order_lookup,success,True,True,True,1,False,订单 T0000137 状态为已送达，商品为 Towel，金额 6.96 元。
+A05,查看订单 T0000148,order_lookup,success,order_lookup,success,True,True,True,1,False,订单 T0000148 状态为已送达，商品为 Running Shoes，金额 331.94 元。
+A06,订单 T9999999 到哪了？,order_lookup,not_found,order_lookup,not_found,True,True,True,1,False,没有找到订单 T9999999。
+A07,P1025 当前库存是否需要补货？,inventory_lookup,success,inventory_lookup,success,True,True,True,1,False,P1025（Dress）可用库存 103，补货点 40，状态为库存正常。
+A08,查一下 P1050 的库存,inventory_lookup,success,inventory_lookup,success,True,True,True,1,False,P1050（Moisturizer）可用库存 134，补货点 50，状态为库存正常。
+A09,P1098 会缺货吗？,inventory_lookup,success,inventory_lookup,success,True,True,True,1,False,P1098（Board Game）可用库存 100，补货点 50，状态为库存正常。
+A10,P1073 还有多少库存,inventory_lookup,success,inventory_lookup,success,True,True,True,1,False,P1073（Towel）可用库存 69，补货点 40，状态为库存正常。
+A11,P1086 是否低于补货点？,inventory_lookup,success,inventory_lookup,success,True,True,True,1,False,P1086（Running Shoes）可用库存 14，补货点 50，状态为低库存。
+A12,P9999 当前库存多少？,inventory_lookup,not_found,inventory_lookup,not_found,True,True,True,1,False,没有找到 P9999 的库存记录。
+A13,电子产品退货政策是什么？,return_policy,success,return_policy,success,True,True,True,1,False,Electronics 的演示退货窗口为 14 天，拆封后需人工复核。需保留完整配件和包装，质量问题转人工复核。
+A14,美妆商品可以几天内退货？,return_policy,success,return_policy,success,True,True,True,1,False,Beauty 的演示退货窗口为 14 天，拆封后需人工复核。已拆封的个人护理类商品需人工复核。
+A15,食品退货规则是什么？,return_policy,success,return_policy,success,True,True,True,1,False,Groceries 的演示退货窗口为 7 天，拆封后需人工复核。食品类仅支持未拆封商品申请。
+A16,图书退货政策是什么？,return_policy,success,return_policy,success,True,True,True,1,False,Books 的演示退货窗口为 30 天，允许拆封后申请。商品需保持完整；最终结果由售后人员复核。
+A17,服装退货期限有几天？,return_policy,success,return_policy,success,True,True,True,1,False,Clothing 的演示退货窗口为 30 天，允许拆封后申请。商品需保持完整；最终结果由售后人员复核。
+A18,运动商品的退换规则是什么？,return_policy,success,return_policy,success,True,True,True,1,False,Sports 的演示退货窗口为 30 天，允许拆封后申请。商品需保持完整；最终结果由售后人员复核。
+A19,玩具退货政策是什么？,return_policy,success,return_policy,success,True,True,True,1,False,Toys 的演示退货窗口为 30 天，允许拆封后申请。需保证主体和配件完整。
+A20,退货政策有哪些？,return_policy,success,return_policy,success,True,True,True,1,False,请指定品类；当前可查询图书、美妆、电子产品、服装、食品、家居、运动和玩具等政策。
+A21,订单 T0000064 想退货，原因是尺寸不合适,return_request,waiting_approval,return_request,waiting_approval,True,True,True,4,True,订单 T0000064 可以提交退货申请。已送达 14 天，仍在 30 天申请窗口内；这里只表示可以提交申请，最终结果仍需售后人员复核。系统尚未写入申请，需你明确确认。
+A22,订单 T0000070 想退款，因为不再需要,return_request,blocked,return_request,blocked,True,True,True,3,False,订单 T0000070 当前不能提交退货申请：已送达 17 天，超过 14 天申请窗口。
+A23,订单 T0000094 想退货，原因是配件不合适,return_request,waiting_approval,return_request,waiting_approval,True,True,True,4,True,订单 T0000094 可以提交退货申请。已送达 21 天，仍在 30 天申请窗口内；这里只表示可以提交申请，最终结果仍需售后人员复核。系统尚未写入申请，需你明确确认。
+A24,订单 T0000403 想退货，原因是不喜欢,return_request,blocked,return_request,blocked,True,True,True,3,False,订单 T0000403 当前不能提交退货申请：已送达 12 天，超过 7 天申请窗口。
+A25,订单 T0020032 想退货，原因是下错单,return_request,blocked,return_request,blocked,True,True,True,3,False,订单 T0020032 当前不能提交退货申请：订单尚未送达，不能创建退货申请。
+A26,订单 T0074297 想退款，因为商品闲置,return_request,blocked,return_request,blocked,True,True,True,3,False,订单 T0074297 当前不能提交退货申请：已送达 727 天，超过 14 天申请窗口。
+A27,我想申请退货,return_request,needs_input,return_request,needs_input,True,True,True,1,False,请补充订单号，例如：订单 T0000064 想退货，原因是尺寸不合适。
+A28,帮我看看库存,inventory_lookup,needs_input,inventory_lookup,needs_input,True,True,True,1,False,请补充商品编号，例如：P1025 当前库存是否需要补货？
+A29,帮我把这个月业务都处理好,clarification,needs_input,clarification,needs_input,True,True,True,1,False,我暂时无法判断要调用哪个工具。你可以查询订单、库存、退货政策，或提交带订单号的退货申请。
+A30,订单 T9999999 想退货，原因是没收到,return_request,not_found,return_request,not_found,True,True,True,1,False,没有找到订单 T9999999，未继续执行退货流程。

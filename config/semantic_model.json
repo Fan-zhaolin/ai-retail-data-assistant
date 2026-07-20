@@ -1,0 +1,85 @@
+{
+  "name": "零售销售语义模型",
+  "tables": {
+    "fact_sales": {
+      "description": "销售事实表，保存交易发生时的订单、用户标签、渠道、地区和金额信息",
+      "columns": {
+        "transaction_id": "交易编号",
+        "transaction_date": "交易日期",
+        "customer_id": "客户编号",
+        "customer_gender": "交易发生时记录的客户性别",
+        "customer_age_group": "交易发生时记录的年龄分组",
+        "customer_segment": "交易发生时记录的客户分群",
+        "product_id": "商品编号",
+        "quantity": "销售件数",
+        "discount_pct": "折扣百分数",
+        "sales_amount": "折后净销售额",
+        "payment_method": "支付方式",
+        "sales_channel": "销售渠道",
+        "region": "交易发生时记录的地区"
+      }
+    },
+    "dim_product": {
+      "description": "商品维度表，保存相对稳定的商品属性",
+      "columns": {
+        "product_id": "商品编号",
+        "product_name": "商品名称",
+        "category": "商品品类",
+        "brand": "品牌",
+        "unit_price": "商品标价"
+      }
+    }
+  },
+  "joins": [
+    {
+      "left": "fact_sales.product_id",
+      "right": "dim_product.product_id",
+      "description": "销售事实表通过商品编号关联商品维度表"
+    }
+  ],
+  "metrics": {
+    "净销售额": "SUM(fact_sales.sales_amount)",
+    "订单数": "COUNT(DISTINCT fact_sales.transaction_id)",
+    "客单价": "SUM(fact_sales.sales_amount) / COUNT(DISTINCT fact_sales.transaction_id)",
+    "销售件数": "SUM(fact_sales.quantity)",
+    "平均折扣": "AVG(fact_sales.discount_pct)",
+    "折前销售额": "SUM(dim_product.unit_price * fact_sales.quantity)，需要关联 dim_product",
+    "折扣金额": "折前销售额 - 净销售额，需要关联 dim_product"
+  },
+  "field_constraints": [
+    "discount_pct 的单位是百分数，实际取值为 0、5、10、15、20、25、30",
+    "金额字段保留两位小数",
+    "customer_age_group、customer_segment 和 region 是交易发生时的标签，不能当作稳定不变的客户属性"
+  ],
+  "synonyms": {
+    "图书": "Books",
+    "美妆": "Beauty",
+    "运动": "Sports",
+    "杂货": "Groceries",
+    "食品杂货": "Groceries",
+    "手机端": "Mobile App",
+    "门店": "In-Store",
+    "线下门店": "In-Store",
+    "网页端": "Online"
+  },
+  "unsupported_fields": [
+    "库存",
+    "成本",
+    "利润",
+    "门店实时数据",
+    "退货",
+    "商品评价"
+  ],
+  "query_rules": [
+    "只返回一条 SQLite SQL，不要解释，不要使用 Markdown 代码围栏",
+    "只能使用语义模型中给定的表和字段，不能虚构字段",
+    "只能生成 SELECT 或只读 WITH 查询",
+    "需要商品品类、商品名称或品牌时，必须关联 dim_product",
+    "按月份统计时使用 strftime('%Y-%m', transaction_date)",
+    "除非用户明确要求，否则查询结果最多返回 30 行",
+    "最大折扣订单数只统计 discount_pct 等于最大折扣的记录",
+    "查询不存在的品类时使用等值条件，不能把不存在误解为不等于",
+    "同时查询最高和最低月份时，先用 CTE 汇总月度数据，再筛选最大值和最小值",
+    "比较线上和线下时，线上合并 Online 和 Mobile App，线下使用 In-Store"
+  ]
+}

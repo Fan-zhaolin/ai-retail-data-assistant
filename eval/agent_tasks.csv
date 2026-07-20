@@ -1,0 +1,31 @@
+id,query,expected_route,expected_status
+A01,订单 T0000064 到哪了？,order_lookup,success
+A02,帮我查一下订单 T0000070 的状态,order_lookup,success
+A03,订单 T0000094 发货了吗？,order_lookup,success
+A04,T0000137 这个订单物流到哪了,order_lookup,success
+A05,查看订单 T0000148,order_lookup,success
+A06,订单 T9999999 到哪了？,order_lookup,not_found
+A07,P1025 当前库存是否需要补货？,inventory_lookup,success
+A08,查一下 P1050 的库存,inventory_lookup,success
+A09,P1098 会缺货吗？,inventory_lookup,success
+A10,P1073 还有多少库存,inventory_lookup,success
+A11,P1086 是否低于补货点？,inventory_lookup,success
+A12,P9999 当前库存多少？,inventory_lookup,not_found
+A13,电子产品退货政策是什么？,return_policy,success
+A14,美妆商品可以几天内退货？,return_policy,success
+A15,食品退货规则是什么？,return_policy,success
+A16,图书退货政策是什么？,return_policy,success
+A17,服装退货期限有几天？,return_policy,success
+A18,运动商品的退换规则是什么？,return_policy,success
+A19,玩具退货政策是什么？,return_policy,success
+A20,退货政策有哪些？,return_policy,success
+A21,订单 T0000064 想退货，原因是尺寸不合适,return_request,waiting_approval
+A22,订单 T0000070 想退款，因为不再需要,return_request,blocked
+A23,订单 T0000094 想退货，原因是配件不合适,return_request,waiting_approval
+A24,订单 T0000403 想退货，原因是不喜欢,return_request,blocked
+A25,订单 T0020032 想退货，原因是下错单,return_request,blocked
+A26,订单 T0074297 想退款，因为商品闲置,return_request,blocked
+A27,我想申请退货,return_request,needs_input
+A28,帮我看看库存,inventory_lookup,needs_input
+A29,帮我把这个月业务都处理好,clarification,needs_input
+A30,订单 T9999999 想退货，原因是没收到,return_request,not_found
